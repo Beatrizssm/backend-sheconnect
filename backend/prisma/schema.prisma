@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ENTREPRENEUR
+  MENTOR
+  INVESTOR
+  ADMIN
+}
+
+enum MentorshipStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COMPLETED
+  CANCELLED
+}
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+}
+
+model User {
+  id                      String              @id @default(uuid()) @db.Uuid
+  name                    String
+  email                   String              @unique
+  password                String
+  role                    Role
+  createdAt               DateTime            @default(now())
+  startups                Startup[]           @relation("FounderStartups")
+  mentorMentorships       Mentorship[]        @relation("MentorMentorships")
+  entrepreneurMentorships Mentorship[]        @relation("EntrepreneurMentorships")
+  notifications           Notification[]
+  organizedEvents         Event[]
+  eventRegistrations      EventRegistration[]
+}
+
+model Startup {
+  id          String   @id @default(uuid()) @db.Uuid
+  founderId   String   @db.Uuid
+  name        String
+  description String
+  category    String
+  stage       String
+  website     String?
+  linkedin    String?
+  instagram   String?
+  pitch       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  founder     User     @relation("FounderStartups", fields: [founderId], references: [id], onDelete: Cascade)
+
+  @@index([founderId])
+  @@index([category])
+  @@index([stage])
+  @@index([createdAt])
+}
+
+model Mentorship {
+  id             String           @id @default(uuid()) @db.Uuid
+  entrepreneurId String           @db.Uuid
+  mentorId       String           @db.Uuid
+  title          String
+  description    String
+  category       String
+  status         MentorshipStatus @default(PENDING)
+  scheduledAt    DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  entrepreneur   User             @relation("EntrepreneurMentorships", fields: [entrepreneurId], references: [id], onDelete: Cascade)
+  mentor         User             @relation("MentorMentorships", fields: [mentorId], references: [id], onDelete: Cascade)
+
+  @@index([entrepreneurId])
+  @@index([mentorId])
+  @@index([status])
+  @@index([category])
+  @@index([createdAt])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  action     String
+  entity     String
+  entityId   String?
+  userId     String   @db.Uuid
+  beforeData Json?
+  afterData  Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([entity])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model Event {
+  id           String   @id @default(uuid()) @db.Uuid
+  title        String
+  description  String
+  category     String
+  location     String?
+  isOnline     Boolean  @default(false)
+  meetingLink  String?
+  eventDate    DateTime
+  maxAttendees Int?
+  organizerId  String   @db.Uuid
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  organizer User @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+
+  registrations EventRegistration[]
+
+  @@index([organizerId])
+  @@index([eventDate])
+  @@index([category])
+}
+
+model EventRegistration {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  eventId   String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@index([userId])
+  @@index([eventId])
+}
+
+model Notification {
+  id        String           @id @default(uuid()) @db.Uuid
+  userId    String           @db.Uuid
+  title     String
+  message   String
+  type      NotificationType @default(INFO)
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}

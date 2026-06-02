@@ -1,0 +1,63 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sheconnect-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sheconnect
+      POSTGRES_PASSWORD: sheconnect
+      POSTGRES_DB: sheconnect
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - sheconnect_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sheconnect -d sheconnect"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  mongodb:
+    image: mongo:4.4
+    container_name: sheconnect-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: sheconnect
+      MONGO_INITDB_ROOT_PASSWORD: sheconnect
+      MONGO_INITDB_DATABASE: sheconnect
+    ports:
+      - "27017:27017"
+    volumes:
+      - sheconnect_mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongo", "--quiet", "--username", "sheconnect", "--password", "sheconnect", "--authenticationDatabase", "admin", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: sheconnect-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: sheconnect
+      RABBITMQ_DEFAULT_PASS: sheconnect
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - sheconnect_rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  sheconnect_postgres_data:
+  sheconnect_mongo_data:
+  sheconnect_rabbitmq_data:

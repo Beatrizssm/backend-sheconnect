@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2022",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "types": ["node", "jest"]
+  },
+  "include": [
+    "src/server.ts",
+    "src/app.module.ts",
+    "src/domains/**/*.ts",
+    "src/application/**/*.ts",
+    "src/infrastructure/**/*.ts",
+    "src/interfaces/**/*.ts",
+    "src/modules/**/*.ts",
+    "src/shared/**/*.ts"
+  ],
+  "exclude": ["node_modules", "dist", "src/App.tsx", "src/main.tsx"]
+}
