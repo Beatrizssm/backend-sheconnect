@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { Role } from '../../../../../domains/user/enums/role.enum';
 import { MentorshipEntity, MentorshipStatus } from '../../../domain/entities/mentorship.entity';
 import {
@@ -20,7 +20,11 @@ export class ListMentorshipsUseCase {
     private readonly mentorships: MentorshipRepository,
   ) {}
 
-  execute(input: ListMentorshipsInput): Promise<MentorshipEntity[]> {
+  async execute(input: ListMentorshipsInput): Promise<MentorshipEntity[]> {
+    if (input.userRole === Role.INVESTOR) {
+      throw new ForbiddenException('Investors cannot access mentorship data.');
+    }
+
     return this.mentorships.findMany(input);
   }
 }

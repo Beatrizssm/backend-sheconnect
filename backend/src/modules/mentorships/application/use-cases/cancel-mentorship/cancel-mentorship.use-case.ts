@@ -16,7 +16,7 @@ export class CancelMentorshipUseCase {
   execute(input: CancelMentorshipInput): Promise<MentorshipEntity> {
     return this.changeStatus.execute({
       ...input,
-      status: MentorshipStatus.CANCELLED,
+      status: MentorshipStatus.CANCELADA,
     });
   }
 }

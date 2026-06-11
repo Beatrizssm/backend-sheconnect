@@ -8,6 +8,7 @@ import {
   UserRepositoryPort,
 } from '../../domains/user/repositories/user.repository.port';
 import { GoogleLoginDto, LoginDto, RegisterUserDto } from '../../shared/dto/auth.dto';
+import { RefreshTokenService } from './refresh-token.service';
 
 export type AuthUserResponse = {
   id: string;
@@ -23,6 +24,7 @@ export class AuthService {
     private readonly registerUserUseCase: RegisterUserUseCase,
     private readonly loginUseCase: LoginUseCase,
     private readonly googleLoginUseCase: GoogleLoginUseCase,
+    private readonly refreshTokenService: RefreshTokenService,
     @Inject(USER_REPOSITORY)
     private readonly users: UserRepositoryPort,
   ) {}
@@ -32,12 +34,28 @@ export class AuthService {
     return this.toResponse(user);
   }
 
-  login(dto: LoginDto): Promise<{ accessToken: string; user: AuthUserResponse }> {
-    return this.loginUseCase.execute(dto);
+  async login(
+    dto: LoginDto,
+    context?: { ip?: string; userAgent?: string },
+  ): Promise<{ accessToken: string; refreshToken: string; user: AuthUserResponse }> {
+    const result = await this.loginUseCase.execute(dto);
+    const refreshToken = await this.refreshTokenService.createSession({
+      userId: result.user.id,
+      email: result.user.email,
+      role: result.user.role,
+      ip: context?.ip,
+      userAgent: context?.userAgent,
+    });
+
+    return { ...result, refreshToken };
   }
 
   googleLogin(dto: GoogleLoginDto): Promise<{ accessToken: string; user: AuthUserResponse }> {
     return this.googleLoginUseCase.execute(dto);
+  }
+
+  refresh(refreshToken: string) {
+    return this.refreshTokenService.refresh(refreshToken);
   }
 
   async me(userId: string): Promise<AuthUserResponse> {

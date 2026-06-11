@@ -7,6 +7,7 @@ import {
   UserRepositoryPort,
 } from '../../domains/user/repositories/user.repository.port';
 import { PasswordHasher } from '../../shared/utils/password-hasher';
+import { Role } from '../../domains/user/enums/role.enum';
 
 type RegisterUserInput = {
   name: string;
@@ -34,7 +35,7 @@ export class RegisterUserUseCase {
     }
 
     const password = await PasswordHasher.hash(input.password);
-    const user = UserEntity.create({ ...input, password });
+    const user = UserEntity.create({ ...input, role: Role.ENTREPRENEUR, password });
 
     const createdUser = await this.users.create(user);
 

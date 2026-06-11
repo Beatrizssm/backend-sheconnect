@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/c
 import { AuthenticatedUser } from '../../../auth/jwt.strategy';
 import { CurrentUser } from '../../../auth/current-user.decorator';
 import { JwtGuard } from '../../../auth/jwt.guard';
+import { VerifiedUserGuard } from '../../../auth/verified-user.guard';
 import { DeleteMessageUseCase } from '../../application/use-cases/delete-message/delete-message.use-case';
 import { GetConversationMessagesUseCase } from '../../application/use-cases/get-conversation-messages/get-conversation-messages.use-case';
 import { ListConversationsUseCase } from '../../application/use-cases/list-conversations/list-conversations.use-case';
@@ -9,7 +10,7 @@ import { SendMessageUseCase } from '../../application/use-cases/send-message/sen
 import { CreateChatMessageDto } from '../dto/create-chat-message.dto';
 import { ChatMessageMapper } from '../mappers/chat-message.mapper';
 
-@UseGuards(JwtGuard)
+@UseGuards(JwtGuard, VerifiedUserGuard)
 @Controller('chat')
 export class ChatController {
   constructor(

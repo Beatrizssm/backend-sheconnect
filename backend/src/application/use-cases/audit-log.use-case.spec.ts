@@ -31,7 +31,10 @@ describe('Enterprise audit logs', () => {
         userId: 'user-id',
         beforeData: { name: 'Old name' },
         afterData: { name: 'New name' },
+        oldValue: { name: 'Old name' },
+        newValue: { name: 'New name' },
         ipAddress: '127.0.0.1',
+        userAgent: undefined,
       },
     });
   });

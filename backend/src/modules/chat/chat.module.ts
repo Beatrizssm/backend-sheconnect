@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { USER_REPOSITORY } from '../../domains/user/repositories/user.repository.port';
 import { AuditModule } from '../../infrastructure/audit/audit.module';
+import { AuthModule } from '../auth/auth.module';
 import { WebsocketModule } from '../../infrastructure/websocket/websocket.module';
 import { PrismaUserRepository } from '../../infrastructure/repositories/prisma-user.repository';
 import { PersistenceModule } from '../persistence.module';
@@ -10,10 +11,10 @@ import { ListConversationsUseCase } from './application/use-cases/list-conversat
 import { SendMessageUseCase } from './application/use-cases/send-message/send-message.use-case';
 import { CHAT_MESSAGE_REPOSITORY } from './domain/repositories/chat-message.repository';
 import { ChatController } from './infrastructure/controllers/chat.controller';
-import { MongoChatMessageRepository } from './infrastructure/mongo/mongo-chat-message.repository';
+import { PrismaChatMessageRepository } from './infrastructure/prisma/prisma-chat-message.repository';
 
 @Module({
-  imports: [PersistenceModule, WebsocketModule, AuditModule],
+  imports: [PersistenceModule, WebsocketModule, AuditModule, AuthModule],
   controllers: [ChatController],
   providers: [
     SendMessageUseCase,
@@ -22,7 +23,7 @@ import { MongoChatMessageRepository } from './infrastructure/mongo/mongo-chat-me
     DeleteMessageUseCase,
     {
       provide: CHAT_MESSAGE_REPOSITORY,
-      useClass: MongoChatMessageRepository,
+      useClass: PrismaChatMessageRepository,
     },
     {
       provide: USER_REPOSITORY,

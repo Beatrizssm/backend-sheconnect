@@ -52,7 +52,7 @@ describe('Mentorships use cases', () => {
       category: 'Growth',
     });
 
-    expect(mentorship.status).toBe(MentorshipStatus.PENDING);
+    expect(mentorship.status).toBe(MentorshipStatus.SOLICITADA);
     expect(mentorship.entrepreneurId).toBe('entrepreneur-id');
     expect(auditLogger.log).toHaveBeenCalledWith(expect.objectContaining({
       action: 'MENTORSHIP_CREATED',
@@ -77,7 +77,7 @@ describe('Mentorships use cases', () => {
     });
     const acceptedMentorship = MentorshipEntity.create({
       ...mentorship.toPrimitives(),
-      status: MentorshipStatus.ACCEPTED,
+      status: MentorshipStatus.ACEITA,
     });
     mentorships.findById.mockResolvedValue(mentorship);
     mentorships.updateStatus.mockResolvedValue(acceptedMentorship);
@@ -91,14 +91,14 @@ describe('Mentorships use cases', () => {
         userId: 'mentor-id',
         userRole: Role.MENTOR,
       }),
-    ).resolves.toMatchObject({ status: MentorshipStatus.ACCEPTED });
+    ).resolves.toMatchObject({ status: MentorshipStatus.ACEITA });
     expect(auditLogger.log).toHaveBeenCalledWith(expect.objectContaining({
       action: 'MENTORSHIP_ACCEPTED',
       userId: 'mentor-id',
       entity: 'Mentorship',
       entityId: mentorship.id,
-      beforeData: expect.objectContaining({ status: MentorshipStatus.PENDING }),
-      afterData: expect.objectContaining({ status: MentorshipStatus.ACCEPTED }),
+      beforeData: expect.objectContaining({ status: MentorshipStatus.SOLICITADA }),
+      afterData: expect.objectContaining({ status: MentorshipStatus.ACEITA }),
     }));
   });
 
@@ -137,6 +137,17 @@ describe('Mentorships use cases', () => {
         title: 'Growth',
         description: 'Tentativa sem permissão.',
         category: 'Growth',
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+  });
+
+  it('prevents investors from listing mentorships', async () => {
+    const useCase = new ListMentorshipsUseCase(mentorships);
+
+    await expect(
+      useCase.execute({
+        userId: 'investor-id',
+        userRole: Role.INVESTOR,
       }),
     ).rejects.toBeInstanceOf(ForbiddenException);
   });

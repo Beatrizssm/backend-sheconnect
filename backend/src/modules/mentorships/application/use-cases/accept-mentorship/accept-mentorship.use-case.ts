@@ -15,9 +15,14 @@ export class AcceptMentorshipUseCase {
   constructor(private readonly changeStatus: ChangeMentorshipStatusUseCase) {}
 
   execute(input: AcceptMentorshipInput): Promise<MentorshipEntity> {
+    const nextStatus = input.scheduledAt
+      ? MentorshipStatus.AGENDADA
+      : MentorshipStatus.ACEITA;
+
     return this.changeStatus.execute({
       ...input,
-      status: MentorshipStatus.ACCEPTED,
+      status: nextStatus,
+      scheduledAt: input.scheduledAt,
     });
   }
 }

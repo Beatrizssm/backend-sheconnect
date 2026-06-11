@@ -59,9 +59,9 @@ describe(DashboardMetricsService.name, () => {
       ]);
     prisma.mentorship.count.mockResolvedValue(4);
     prisma.mentorship.groupBy.mockResolvedValue([
-      { status: 'PENDING', _count: { _all: 1 } },
-      { status: 'ACCEPTED', _count: { _all: 1 } },
-      { status: 'COMPLETED', _count: { _all: 2 } },
+      { status: 'SOLICITADA', _count: { _all: 1 } },
+      { status: 'ACEITA', _count: { _all: 1 } },
+      { status: 'CONCLUIDA', _count: { _all: 2 } },
     ]);
     prisma.event.count.mockImplementation((args?: { where?: { isOnline?: boolean; eventDate?: unknown } }) => {
       if (args?.where?.eventDate) {

@@ -34,7 +34,9 @@ export class MongoService implements OnModuleInit, OnModuleDestroy {
       'MONGODB_URI',
       'mongodb://sheconnect:sheconnect@localhost:27017/sheconnect?authSource=admin',
     );
-    this.client = new MongoClient(url);
+    this.client = new MongoClient(url, {
+      serverSelectionTimeoutMS: 3000,
+    });
 
     try {
       await this.client.connect();
@@ -65,6 +67,15 @@ export class MongoService implements OnModuleInit, OnModuleDestroy {
 
   get chatMessages(): Collection<ChatMessageDocument> {
     return this.getCollection<ChatMessageDocument>('chat_messages');
+  }
+
+  async isHealthy(): Promise<boolean> {
+    if (!this.database) {
+      return false;
+    }
+
+    await this.database.command({ ping: 1 });
+    return true;
   }
 
   private getCollection<T extends Record<string, unknown>>(name: string): Collection<T> {

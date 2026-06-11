@@ -49,10 +49,17 @@ export class GoogleLoginUseCase {
       throw new BadRequestException('Google login is not configured.');
     }
 
-    const ticket = await this.googleClient.verifyIdToken({
-      idToken: input.credential,
-      audience: googleClientId,
-    });
+    let ticket;
+
+    try {
+      ticket = await this.googleClient.verifyIdToken({
+        idToken: input.credential,
+        audience: googleClientId,
+      });
+    } catch {
+      throw new UnauthorizedException('Credencial Google inválida ou expirada.');
+    }
+
     const payload = ticket.getPayload();
 
     if (!payload?.email || !payload.email_verified) {

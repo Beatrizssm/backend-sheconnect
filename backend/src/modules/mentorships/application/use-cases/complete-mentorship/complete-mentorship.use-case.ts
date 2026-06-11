@@ -16,7 +16,7 @@ export class CompleteMentorshipUseCase {
   execute(input: CompleteMentorshipInput): Promise<MentorshipEntity> {
     return this.changeStatus.execute({
       ...input,
-      status: MentorshipStatus.COMPLETED,
+      status: MentorshipStatus.CONCLUIDA,
     });
   }
 }

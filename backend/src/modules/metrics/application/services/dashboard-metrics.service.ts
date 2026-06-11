@@ -154,15 +154,22 @@ export class DashboardMetricsService {
       }),
     ]);
     const statusCounts = new Map(byStatus.map((item) => [item.status, item._count._all]));
-    const completed = statusCounts.get(MentorshipStatus.COMPLETED) ?? 0;
+    const completed = statusCounts.get(MentorshipStatus.CONCLUIDA) ?? 0;
+    const pending =
+      (statusCounts.get(MentorshipStatus.SOLICITADA) ?? 0) +
+      (statusCounts.get(MentorshipStatus.EM_ANALISE) ?? 0);
+    const accepted =
+      (statusCounts.get(MentorshipStatus.ACEITA) ?? 0) +
+      (statusCounts.get(MentorshipStatus.AGENDADA) ?? 0) +
+      (statusCounts.get(MentorshipStatus.EM_ANDAMENTO) ?? 0);
 
     return {
       total,
-      pending: statusCounts.get(MentorshipStatus.PENDING) ?? 0,
-      accepted: statusCounts.get(MentorshipStatus.ACCEPTED) ?? 0,
-      rejected: statusCounts.get(MentorshipStatus.REJECTED) ?? 0,
+      pending,
+      accepted,
+      rejected: statusCounts.get(MentorshipStatus.REJEITADA) ?? 0,
       completed,
-      cancelled: statusCounts.get(MentorshipStatus.CANCELLED) ?? 0,
+      cancelled: statusCounts.get(MentorshipStatus.CANCELADA) ?? 0,
       completionRate: total > 0 ? Number(((completed / total) * 100).toFixed(2)) : 0,
     };
   }

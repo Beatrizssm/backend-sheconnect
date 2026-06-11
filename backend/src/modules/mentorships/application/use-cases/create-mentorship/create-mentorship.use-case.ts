@@ -19,6 +19,8 @@ export type CreateMentorshipInput = {
   title: string;
   description: string;
   category: string;
+  mentorshipArea?: string;
+  initialMessage?: string;
 };
 
 @Injectable()
@@ -57,20 +59,25 @@ export class CreateMentorshipUseCase {
         title: input.title,
         description: input.description,
         category: input.category,
+        mentorshipArea: input.mentorshipArea,
+        initialMessage: input.initialMessage,
       }),
     );
+
+    const afterData = mentorship.toPrimitives();
 
     await this.auditLogger.log({
       action: 'MENTORSHIP_CREATED',
       userId: input.entrepreneurId,
       entity: 'Mentorship',
       entityId: mentorship.id,
-      afterData: mentorship.toPrimitives(),
+      afterData,
+      newValue: { status: afterData.status },
     });
-    await this.eventBus?.publish('MENTORSHIP_CREATED', {
+    await this.eventBus?.publish('MENTORSHIP_REQUESTED', {
       userId: input.entrepreneurId,
       entityId: mentorship.id,
-      payload: mentorship.toPrimitives(),
+      payload: afterData,
     });
 
     return mentorship;

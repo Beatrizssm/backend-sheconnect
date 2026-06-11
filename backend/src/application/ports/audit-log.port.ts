@@ -7,7 +7,10 @@ export interface CreateAuditLogInput {
   userId: string;
   beforeData?: unknown;
   afterData?: unknown;
+  oldValue?: unknown;
+  newValue?: unknown;
   ipAddress?: string;
+  userAgent?: string;
 }
 
 export type AuditLogInput = CreateAuditLogInput;

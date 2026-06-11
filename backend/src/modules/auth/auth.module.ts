@@ -13,6 +13,8 @@ import { PersistenceModule } from '../persistence.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
+import { RefreshTokenService } from './refresh-token.service';
+import { VerifiedUserGuard } from './verified-user.guard';
 
 @Module({
   imports: [
@@ -32,14 +34,17 @@ import { JwtStrategy } from './jwt.strategy';
   controllers: [AuthController],
   providers: [
     AuthService,
+    RefreshTokenService,
     RegisterUserUseCase,
     LoginUseCase,
     GoogleLoginUseCase,
     JwtStrategy,
+    VerifiedUserGuard,
     {
       provide: USER_REPOSITORY,
       useClass: PrismaUserRepository,
     },
   ],
+  exports: [VerifiedUserGuard],
 })
 export class AuthModule {}

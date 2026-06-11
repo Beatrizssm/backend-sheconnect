@@ -38,11 +38,14 @@ export class DomainNotificationHandlerService implements OnModuleInit {
           type: NotificationType.SUCCESS,
         });
       case 'STARTUP_CREATED':
+      case 'startup_created':
         return this.forUser(event.userId, {
           title: 'Startup cadastrada',
           message: 'Sua startup foi cadastrada com sucesso.',
           type: NotificationType.SUCCESS,
         });
+      case 'MENTORSHIP_REQUESTED':
+      case 'mentorship_requested':
       case 'MENTORSHIP_CREATED':
         return this.forUser(this.getString(event.payload.mentorId), {
           title: 'Nova solicitação de mentoria',
@@ -86,6 +89,19 @@ export class DomainNotificationHandlerService implements OnModuleInit {
           message: `Uma usuária se inscreveu em ${this.getString(event.payload.eventTitle) ?? 'seu evento'}.`,
           type: NotificationType.INFO,
         });
+      case 'USER_CONNECTED':
+        return [
+          ...this.forUser(this.getString(event.payload.requesterId), {
+            title: 'Conexão criada',
+            message: 'Sua rede SheConnect ganhou uma nova conexão.',
+            type: NotificationType.SUCCESS,
+          }),
+          ...this.forUser(this.getString(event.payload.receiverId), {
+            title: 'Nova conexão',
+            message: 'Você tem uma nova conexão na SheConnect.',
+            type: NotificationType.SUCCESS,
+          }),
+        ];
       case 'EVENT_UNREGISTERED':
         return this.forUser(this.getString(event.payload.organizerId), {
           title: 'Inscrição cancelada',

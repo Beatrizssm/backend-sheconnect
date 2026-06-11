@@ -16,7 +16,10 @@ export class PrismaAuditLoggerService implements AuditLoggerPort {
         userId: input.userId,
         beforeData: this.toJson(input.beforeData),
         afterData: this.toJson(input.afterData),
+        oldValue: this.toJson(input.oldValue ?? input.beforeData),
+        newValue: this.toJson(input.newValue ?? input.afterData),
         ipAddress: input.ipAddress,
+        userAgent: input.userAgent,
       },
     });
   }

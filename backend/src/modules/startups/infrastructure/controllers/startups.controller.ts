@@ -7,8 +7,11 @@ import { Roles } from '../../../auth/roles.decorator';
 import { RolesGuard } from '../../../auth/roles.guard';
 import { CreateStartupUseCase } from '../../application/use-cases/create-startup/create-startup.use-case';
 import { DeleteStartupUseCase } from '../../application/use-cases/delete-startup/delete-startup.use-case';
+import { FavoriteStartupUseCase } from '../../application/use-cases/favorite-startup/favorite-startup.use-case';
 import { GetStartupUseCase } from '../../application/use-cases/get-startup/get-startup.use-case';
+import { ListFavoriteStartupsUseCase } from '../../application/use-cases/list-favorite-startups/list-favorite-startups.use-case';
 import { ListStartupsUseCase } from '../../application/use-cases/list-startups/list-startups.use-case';
+import { UnfavoriteStartupUseCase } from '../../application/use-cases/unfavorite-startup/unfavorite-startup.use-case';
 import { UpdateStartupUseCase } from '../../application/use-cases/update-startup/update-startup.use-case';
 import { CreateStartupDto } from '../dto/create-startup.dto';
 import { ListStartupsQueryDto } from '../dto/list-startups-query.dto';
@@ -21,6 +24,9 @@ export class StartupsController {
   constructor(
     private readonly createStartup: CreateStartupUseCase,
     private readonly listStartups: ListStartupsUseCase,
+    private readonly listFavoriteStartups: ListFavoriteStartupsUseCase,
+    private readonly favoriteStartup: FavoriteStartupUseCase,
+    private readonly unfavoriteStartup: UnfavoriteStartupUseCase,
     private readonly getStartup: GetStartupUseCase,
     private readonly updateStartup: UpdateStartupUseCase,
     private readonly deleteStartup: DeleteStartupUseCase,
@@ -38,6 +44,15 @@ export class StartupsController {
     return StartupMapper.toResponse(startup);
   }
 
+  @Get('favorites/my')
+  @Roles(Role.INVESTOR, Role.ADMIN)
+  listFavorites(@CurrentUser() user: AuthenticatedUser) {
+    return this.listFavoriteStartups.execute({
+      userId: user.id,
+      userRole: user.role,
+    });
+  }
+
   @Get()
   async list(@Query() query: ListStartupsQueryDto) {
     const result = await this.listStartups.execute({
@@ -52,6 +67,26 @@ export class StartupsController {
       data: result.data.map(StartupMapper.toResponse),
       meta: result.meta,
     };
+  }
+
+  @Post(':id/favorite')
+  @Roles(Role.INVESTOR, Role.ADMIN)
+  favorite(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.favoriteStartup.execute({
+      userId: user.id,
+      userRole: user.role,
+      startupId: id,
+    });
+  }
+
+  @Delete(':id/favorite')
+  @Roles(Role.INVESTOR, Role.ADMIN)
+  unfavorite(@Param('id') id: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.unfavoriteStartup.execute({
+      userId: user.id,
+      userRole: user.role,
+      startupId: id,
+    });
   }
 
   @Get(':id')

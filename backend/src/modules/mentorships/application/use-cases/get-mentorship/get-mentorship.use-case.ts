@@ -20,6 +20,10 @@ export class GetMentorshipUseCase {
   ) {}
 
   async execute(input: GetMentorshipInput): Promise<MentorshipEntity> {
+    if (input.userRole === Role.INVESTOR) {
+      throw new ForbiddenException('Investors cannot access mentorship data.');
+    }
+
     const mentorship = await this.mentorships.findById(input.id);
 
     if (!mentorship) {
@@ -34,7 +38,7 @@ export class GetMentorshipUseCase {
   }
 
   private canView(mentorship: MentorshipEntity, userId: string, userRole: Role): boolean {
-    if (userRole === Role.ADMIN || userRole === Role.INVESTOR) {
+    if (userRole === Role.ADMIN) {
       return true;
     }
 

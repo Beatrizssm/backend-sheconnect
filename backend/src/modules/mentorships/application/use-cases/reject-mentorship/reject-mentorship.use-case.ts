@@ -7,6 +7,7 @@ type RejectMentorshipInput = {
   id: string;
   userId: string;
   userRole: Role;
+  rejectionReason?: string | null;
 };
 
 @Injectable()
@@ -16,7 +17,8 @@ export class RejectMentorshipUseCase {
   execute(input: RejectMentorshipInput): Promise<MentorshipEntity> {
     return this.changeStatus.execute({
       ...input,
-      status: MentorshipStatus.REJECTED,
+      status: MentorshipStatus.REJEITADA,
+      rejectionReason: input.rejectionReason,
     });
   }
 }

@@ -13,6 +13,8 @@ export type MentorshipListFilters = {
 export type UpdateMentorshipStatusInput = {
   status: MentorshipStatus;
   scheduledAt?: Date | null;
+  completedAt?: Date | null;
+  rejectionReason?: string | null;
 };
 
 export interface MentorshipRepository {

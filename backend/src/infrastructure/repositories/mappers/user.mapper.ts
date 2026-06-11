@@ -14,7 +14,7 @@ export class UserMapper {
     });
   }
 
-  static toPersistence(user: UserEntity): User {
+  static toPersistence(user: UserEntity): Pick<User, 'id' | 'name' | 'email' | 'password' | 'role' | 'createdAt'> {
     return {
       id: user.id,
       name: user.name,

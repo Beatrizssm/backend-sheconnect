@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { MentorshipStatus as PrismaMentorshipStatus, Prisma } from '@prisma/client';
 import { Role } from '../../../../domains/user/enums/role.enum';
 import { PrismaService } from '../../../../infrastructure/prisma/prisma.service';
@@ -26,10 +26,13 @@ export class PrismaMentorshipRepository implements MentorshipRepository {
   }
 
   async findMany(filters: MentorshipListFilters): Promise<MentorshipEntity[]> {
+    if (filters.userRole === Role.INVESTOR) {
+      throw new ForbiddenException('Investors cannot access mentorship data.');
+    }
+
     const where: Prisma.MentorshipWhereInput = {
       ...(filters.status ? { status: filters.status as PrismaMentorshipStatus } : {}),
       ...(filters.category ? { category: { equals: filters.category, mode: 'insensitive' } } : {}),
-      ...(filters.userRole === Role.ADMIN ? {} : {}),
       ...(filters.userRole === Role.ENTREPRENEUR ? { entrepreneurId: filters.userId } : {}),
       ...(filters.userRole === Role.MENTOR ? { mentorId: filters.userId } : {}),
     };
@@ -48,6 +51,8 @@ export class PrismaMentorshipRepository implements MentorshipRepository {
       data: {
         status: input.status as PrismaMentorshipStatus,
         ...(input.scheduledAt !== undefined ? { scheduledAt: input.scheduledAt } : {}),
+        ...(input.completedAt !== undefined ? { completedAt: input.completedAt } : {}),
+        ...(input.rejectionReason !== undefined ? { rejectionReason: input.rejectionReason } : {}),
       },
     });
 

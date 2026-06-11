@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { GoogleLoginDto, LoginDto, RegisterUserDto } from '../../shared/dto/auth.dto';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Request } from 'express';
+import { GoogleLoginDto, LoginDto, RefreshTokenDto, RegisterUserDto } from '../../shared/dto/auth.dto';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './current-user.decorator';
 import { JwtGuard } from './jwt.guard';
@@ -18,8 +19,16 @@ export class AuthController {
   }
 
   @Post('login')
-  login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
+  login(@Body() dto: LoginDto, @Req() request: Request) {
+    return this.authService.login(dto, {
+      ip: request.ip,
+      userAgent: request.headers['user-agent'],
+    });
+  }
+
+  @Post('refresh')
+  refresh(@Body() dto: RefreshTokenDto) {
+    return this.authService.refresh(dto.refreshToken);
   }
 
   @Post('google')

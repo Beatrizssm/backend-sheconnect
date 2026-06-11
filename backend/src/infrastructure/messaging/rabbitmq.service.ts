@@ -18,6 +18,7 @@ export class RabbitMqService implements EventBusPort, OnModuleInit, OnModuleDest
   private channel?: amqp.Channel;
   private readonly consumers: DomainEventConsumer[] = [];
   private isConsuming = false;
+  private hasAttemptedConnection = false;
 
   constructor(private readonly configService: ConfigService) {}
 
@@ -64,6 +65,11 @@ export class RabbitMqService implements EventBusPort, OnModuleInit, OnModuleDest
     await this.startConsumer();
   }
 
+  async isHealthy(): Promise<boolean> {
+    const channel = await this.getChannel();
+    return Boolean(channel);
+  }
+
   private async startConsumer(): Promise<void> {
     if (this.isConsuming || this.consumers.length === 0) {
       return;
@@ -105,8 +111,13 @@ export class RabbitMqService implements EventBusPort, OnModuleInit, OnModuleDest
     }
 
     const url = this.configService.get<string>('RABBITMQ_URL', 'amqp://sheconnect:sheconnect@localhost:5672');
+    if (this.hasAttemptedConnection) {
+      return;
+    }
+
+    this.hasAttemptedConnection = true;
     try {
-      this.connection = await amqp.connect(url);
+      this.connection = await amqp.connect(url, { timeout: 3000 });
       this.channel = await this.connection.createChannel();
       await this.channel.assertExchange(this.exchangeName, 'topic', { durable: true });
       await this.channel.assertQueue(this.queueName, { durable: true });
