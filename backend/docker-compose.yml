@@ -59,5 +59,12 @@ services:
 
 volumes:
   sheconnect_postgres_data:
+    name: backend_sheconnect_postgres_data
   sheconnect_mongo_data:
+    name: backend_sheconnect_mongo_data
   sheconnect_rabbitmq_data:
+    name: backend_sheconnect_rabbitmq_data
+
+networks:
+  default:
+    name: sheconnect-network

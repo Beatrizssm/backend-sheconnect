@@ -1,0 +1,118 @@
+# Microserviços + gateway.
+# Infra (PostgreSQL, MongoDB, RabbitMQ): use backend/docker-compose.yml
+#
+#   cd backend && docker-compose up -d
+#   cd .. && docker-compose up -d --build
+#
+# Ou: bash scripts/docker-up.sh
+
+services:
+  iam:
+    build:
+      context: .
+      dockerfile: services/Dockerfile
+      args:
+        SERVICE_ENTRY: microservices/main-iam
+    container_name: sheconnect-iam
+    restart: unless-stopped
+    environment:
+      SERVICE_NAME: iam
+      PORT: 3001
+      DATABASE_URL: postgresql://sheconnect:sheconnect@sheconnect-postgres:5432/sheconnect?schema=public
+      RABBITMQ_URL: amqp://sheconnect:sheconnect@sheconnect-rabbitmq:5672
+      JWT_SECRET: ${JWT_SECRET:-change-me-to-a-secure-secret}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-me-to-a-secure-refresh-secret}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1d}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000,http://localhost:5173}
+    ports:
+      - "3001:3001"
+    networks:
+      - sheconnect-network
+
+  core:
+    build:
+      context: .
+      dockerfile: services/Dockerfile
+      args:
+        SERVICE_ENTRY: microservices/main-core
+    container_name: sheconnect-core
+    restart: unless-stopped
+    environment:
+      SERVICE_NAME: core
+      PORT: 3000
+      DATABASE_URL: postgresql://sheconnect:sheconnect@sheconnect-postgres:5432/sheconnect?schema=public
+      RABBITMQ_URL: amqp://sheconnect:sheconnect@sheconnect-rabbitmq:5672
+      JWT_SECRET: ${JWT_SECRET:-change-me-to-a-secure-secret}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000,http://localhost:5173}
+    depends_on:
+      - iam
+    ports:
+      - "3000:3000"
+    networks:
+      - sheconnect-network
+
+  data:
+    build:
+      context: .
+      dockerfile: services/Dockerfile
+      args:
+        SERVICE_ENTRY: microservices/main-data
+    container_name: sheconnect-data
+    restart: unless-stopped
+    environment:
+      SERVICE_NAME: data
+      PORT: 3002
+      RABBITMQ_QUEUE_NAME: sheconnect.data
+      DATABASE_URL: postgresql://sheconnect:sheconnect@sheconnect-postgres:5432/sheconnect?schema=public
+      MONGODB_URI: mongodb://sheconnect:sheconnect@sheconnect-mongodb:27017/sheconnect?authSource=admin
+      MONGODB_DATABASE: sheconnect
+      RABBITMQ_URL: amqp://sheconnect:sheconnect@sheconnect-rabbitmq:5672
+      JWT_SECRET: ${JWT_SECRET:-change-me-to-a-secure-secret}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000,http://localhost:5173}
+    ports:
+      - "3002:3002"
+    networks:
+      - sheconnect-network
+
+  audit:
+    build:
+      context: .
+      dockerfile: services/Dockerfile
+      args:
+        SERVICE_ENTRY: microservices/main-audit
+    container_name: sheconnect-audit
+    restart: unless-stopped
+    environment:
+      SERVICE_NAME: audit
+      PORT: 3003
+      RABBITMQ_QUEUE_NAME: sheconnect.audit
+      DATABASE_URL: postgresql://sheconnect:sheconnect@sheconnect-postgres:5432/sheconnect?schema=public
+      RABBITMQ_URL: amqp://sheconnect:sheconnect@sheconnect-rabbitmq:5672
+      JWT_SECRET: ${JWT_SECRET:-change-me-to-a-secure-secret}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000,http://localhost:5173}
+    ports:
+      - "3003:3003"
+    networks:
+      - sheconnect-network
+
+  gateway:
+    image: nginx:1.27-alpine
+    container_name: sheconnect-gateway
+    restart: unless-stopped
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "3333:3333"
+    depends_on:
+      - iam
+      - core
+      - data
+      - audit
+    networks:
+      - sheconnect-network
+
+networks:
+  sheconnect-network:
+    external: true
+    name: sheconnect-network

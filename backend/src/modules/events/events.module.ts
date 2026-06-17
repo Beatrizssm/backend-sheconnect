@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { AuditModule } from '../../infrastructure/audit/audit.module';
+import { AuditLoggerModule } from '../../infrastructure/audit/audit-logger.module';
 import { PersistenceModule } from '../persistence.module';
 import { CreateEventUseCase } from './application/use-cases/create-event/create-event.use-case';
 import { DeleteEventUseCase } from './application/use-cases/delete-event/delete-event.use-case';
@@ -13,7 +13,7 @@ import { EventsController } from './infrastructure/controllers/events.controller
 import { PrismaEventRepository } from './infrastructure/prisma/prisma-event.repository';
 
 @Module({
-  imports: [PersistenceModule, AuditModule],
+  imports: [PersistenceModule, AuditLoggerModule],
   controllers: [EventsController],
   providers: [
     CreateEventUseCase,

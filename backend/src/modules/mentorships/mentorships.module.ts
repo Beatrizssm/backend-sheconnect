@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 
 import { USER_REPOSITORY } from '../../domains/user/repositories/user.repository.port';
 
-import { AuditModule } from '../../infrastructure/audit/audit.module';
+import { AuditLoggerModule } from '../../infrastructure/audit/audit-logger.module';
 
 import { PrismaUserRepository } from '../../infrastructure/repositories/prisma-user.repository';
 
-import { AuthModule } from '../auth/auth.module';
+import { JwtAuthModule } from '../auth/jwt-auth.module';
 
 import { PersistenceModule } from '../persistence.module';
 
@@ -42,7 +42,7 @@ import { PrismaMentorshipRepository } from './infrastructure/prisma/prisma-mento
 
 @Module({
 
-  imports: [PersistenceModule, AuditModule, AuthModule],
+  imports: [PersistenceModule, AuditLoggerModule, JwtAuthModule],
 
   controllers: [MentorshipsController],
 

@@ -1,0 +1,15 @@
+' Estilo compartilhado — diagramas de fluxo SheConnect
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam dpi 120
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam activity {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  FontColor #111111
+}
+skinparam arrow {
+  Color #333333
+  FontSize 10
+}

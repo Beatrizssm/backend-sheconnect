@@ -1,0 +1,51 @@
+@startuml fluxo-principal
+
+!include ../../_includes/estilo-fluxo.puml
+
+start
+
+:Página Inicial\n/;
+
+partition "Acesso público" {
+  if (Ação do usuário?) then (Entrar)
+    :Login\n/login;
+  elseif (Criar conta) then
+    :Cadastro\n/signup;
+  elseif (Esqueci senha) then
+    :Recuperar senha\n/forgot-password;
+  else (Ver demo)
+    :Modo demonstração;
+  endif
+}
+
+if (Autenticação válida\nou demo?) then (sim)
+  :Área logada\n/app/*;
+else (não)
+  :Login;
+  stop
+endif
+
+partition "Rotas da aplicação" {
+  :Menu lateral;
+  note right
+    Navegação por abas
+    /app/dashboard
+    /app/startups
+    /app/mentorias
+    /app/eventos
+    /app/conexoes
+    /app/chat
+    /app/notificacoes
+  end note
+
+  :Perfil\n/profile;
+}
+
+if (Sair?) then (sim)
+  :Página Inicial;
+  stop
+else (não)
+  :Menu lateral;
+endif
+
+@enduml

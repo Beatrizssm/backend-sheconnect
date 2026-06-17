@@ -1,0 +1,49 @@
+@startuml fluxo-modulos-admin
+
+!include ../../_includes/estilo-fluxo.puml
+
+start
+
+:Área logada\nAdministradora;
+
+partition "Menu admin" {
+  :Analytics;
+  :Usuários;
+  :Startups;
+  :Mentorias;
+  :Eventos;
+  :Conexões;
+  :Chat;
+  :Avisos;
+}
+
+partition "Analytics" {
+  :Painel de métricas;
+  :Indicadores de usuárias,\nstartups e mentorias;
+}
+
+partition "Usuários" {
+  :Lista administrativa;
+  if (Ação?) then (Verificações pendentes)
+    :Aprovar verificação;
+  elseif (Denúncias) then
+    :Analisar denúncias;
+  else (Consultar)
+    :Detalhes da usuária;
+  endif
+}
+
+partition "Módulos compartilhados" {
+  :Startups\nEventos\nMentorias\nConexões;
+  note right
+    Mesmos fluxos internos
+    da usuária com visão
+    administrativa
+  end note
+}
+
+:Perfil\n/profile;
+
+stop
+
+@enduml

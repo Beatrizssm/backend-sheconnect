@@ -1,0 +1,43 @@
+@startuml er-eventos
+
+!include ../../_includes/estilo.puml
+
+entity "User" as user {
+  * **id** : UUID <<PK>>
+  --
+  * **name** : String
+  * **email** : String <<UK>>
+  * **role** : Role
+}
+
+entity "Event" as event {
+  * **id** : UUID <<PK>>
+  --
+  * **organizerId** : UUID <<FK>>
+  * **title** : String
+  * **description** : String
+  * **category** : String
+  * **eventDate** : Timestamp
+  **type** : String
+  **speaker** : String
+  **location** : String
+  **isOnline** : Boolean
+  **meetingLink** : String
+  **maxAttendees** : Integer
+  **createdAt** : Timestamp
+  **updatedAt** : Timestamp
+}
+
+entity "EventRegistration" as registration {
+  * **id** : UUID <<PK>>
+  --
+  * **userId** : UUID <<FK>>
+  * **eventId** : UUID <<FK>>
+  **createdAt** : Timestamp
+}
+
+user ||--o{ event : organiza
+user ||--o{ registration : inscreve
+event ||--o{ registration : possui
+
+@enduml

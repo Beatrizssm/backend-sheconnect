@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { USER_REPOSITORY } from '../../domains/user/repositories/user.repository.port';
-import { AuditModule } from '../../infrastructure/audit/audit.module';
+import { AuditLoggerModule } from '../../infrastructure/audit/audit-logger.module';
 import { PrismaUserRepository } from '../../infrastructure/repositories/prisma-user.repository';
-import { AuthModule } from '../auth/auth.module';
+import { JwtAuthModule } from '../auth/jwt-auth.module';
 import { PersistenceModule } from '../persistence.module';
 import { ChangeConnectionStatusUseCase } from './application/use-cases/change-connection-status.use-case';
 import { ConnectUserUseCase } from './application/use-cases/connect-user.use-case';
@@ -12,7 +12,7 @@ import { NetworkingController } from './infrastructure/networking.controller';
 import { PrismaNetworkingRepository } from './infrastructure/prisma/prisma-networking.repository';
 
 @Module({
-  imports: [PersistenceModule, AuditModule, AuthModule],
+  imports: [PersistenceModule, AuditLoggerModule, JwtAuthModule],
   controllers: [NetworkingController],
   providers: [
     ConnectUserUseCase,

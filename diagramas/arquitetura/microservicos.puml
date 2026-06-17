@@ -1,0 +1,42 @@
+@startuml microservicos-sheconnect
+!include ../_includes/estilo.puml
+
+skinparam componentStyle rectangle
+
+actor "Frontend\n(Vite :3000)" as FE
+rectangle "Gateway\nnginx :3333" as GW
+
+rectangle "Microserviços NestJS" {
+  component "IAM :3001\nauth + users" as IAM
+  component "Core :3000\nnegócio + WS" as CORE
+  component "Data :3002\nmetrics + dashboard" as DATA
+  component "Audit :3003\naudit-logs" as AUDIT
+}
+
+database "PostgreSQL\n(compartilhado v1)" as PG
+database "MongoDB\nevent logs" as MONGO
+queue "RabbitMQ\nsheconnect.domain-events" as RMQ
+
+FE --> GW
+GW --> IAM : /api/auth/*\n/api/users/*
+GW --> CORE : /api/* + /socket.io
+GW --> DATA : /api/metrics/*\n/api/dashboard/*
+GW --> AUDIT : /api/audit-logs/*
+
+IAM --> PG
+CORE --> PG
+DATA --> PG
+AUDIT --> PG
+DATA --> MONGO
+
+IAM --> RMQ : publish
+CORE --> RMQ : publish
+RMQ --> AUDIT : fila sheconnect.audit
+RMQ --> DATA : fila sheconnect.data
+
+note right of PG
+  Fase 1: schema Prisma único
+  (packages/shared/prisma)
+end note
+
+@enduml

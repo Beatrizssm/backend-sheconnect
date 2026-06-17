@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { USER_REPOSITORY } from '../../domains/user/repositories/user.repository.port';
-import { AuditModule } from '../../infrastructure/audit/audit.module';
-import { AuthModule } from '../auth/auth.module';
+import { AuditLoggerModule } from '../../infrastructure/audit/audit-logger.module';
+import { JwtAuthModule } from '../auth/jwt-auth.module';
 import { WebsocketModule } from '../../infrastructure/websocket/websocket.module';
 import { PrismaUserRepository } from '../../infrastructure/repositories/prisma-user.repository';
 import { PersistenceModule } from '../persistence.module';
@@ -14,7 +14,7 @@ import { ChatController } from './infrastructure/controllers/chat.controller';
 import { PrismaChatMessageRepository } from './infrastructure/prisma/prisma-chat-message.repository';
 
 @Module({
-  imports: [PersistenceModule, WebsocketModule, AuditModule, AuthModule],
+  imports: [PersistenceModule, WebsocketModule, AuditLoggerModule, JwtAuthModule],
   controllers: [ChatController],
   providers: [
     SendMessageUseCase,

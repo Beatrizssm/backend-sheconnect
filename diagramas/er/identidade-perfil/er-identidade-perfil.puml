@@ -1,0 +1,43 @@
+@startuml er-identidade-perfil
+
+!include ../../_includes/estilo.puml
+
+entity "User" as user {
+  * **id** : UUID <<PK>>
+  --
+  * **name** : String
+  * **email** : String <<UK>>
+  * **password** : String
+  * **role** : Role
+  * **verificationStatus** : VerificationStatus
+  **verifiedAt** : Timestamp
+  **verifiedBy** : UUID <<FK>>
+  **verificationReason** : String
+  **verificationDocument** : String
+  **specialty** : String
+  **experienceYears** : Integer
+  **bio** : String
+  **professionalName** : String
+  **city** : String
+  **area** : String
+  **state** : String
+  **createdAt** : Timestamp
+  **updatedAt** : Timestamp
+}
+
+entity "UserSession" as session {
+  * **id** : UUID <<PK>>
+  --
+  * **userId** : UUID <<FK>>
+  * **refreshTokenHash** : String
+  * **expiresAt** : Timestamp
+  **ip** : String
+  **userAgent** : String
+  **revokedAt** : Timestamp
+  **createdAt** : Timestamp
+}
+
+user ||--o| user : verifica
+user ||--o{ session : possui
+
+@enduml

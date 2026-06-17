@@ -1,0 +1,76 @@
+@startuml er-nucleo-sheconnect
+
+!include ../../_includes/estilo.puml
+
+entity "User" as user {
+  * **id** : UUID <<PK>>
+  --
+  * **name** : String
+  * **email** : String <<UK>>
+  * **password** : String
+  * **role** : Role
+  * **verificationStatus** : VerificationStatus
+  **verifiedBy** : UUID <<FK>>
+  **city** : String
+  **specialty** : String
+  **createdAt** : Timestamp
+  **updatedAt** : Timestamp
+}
+
+entity "Startup" as startup {
+  * **id** : UUID <<PK>>
+  --
+  * **founderId** : UUID <<FK>>
+  * **name** : String
+  * **description** : String
+  * **category** : String
+  * **stage** : String
+  **investmentGoal** : Decimal
+  **valuation** : Decimal
+  **city** : String
+  **createdAt** : Timestamp
+  **updatedAt** : Timestamp
+}
+
+entity "Event" as event {
+  * **id** : UUID <<PK>>
+  --
+  * **organizerId** : UUID <<FK>>
+  * **title** : String
+  * **description** : String
+  * **category** : String
+  **type** : String
+  **location** : String
+  **isOnline** : Boolean
+  * **eventDate** : Timestamp
+  **maxAttendees** : Integer
+  **createdAt** : Timestamp
+  **updatedAt** : Timestamp
+}
+
+entity "Mentorship" as mentorship {
+  * **id** : UUID <<PK>>
+  --
+  * **entrepreneurId** : UUID <<FK>>
+  * **mentorId** : UUID <<FK>>
+  **startupId** : UUID <<FK>>
+  * **title** : String
+  * **description** : String
+  * **category** : String
+  * **status** : MentorshipStatus
+  **scheduledAt** : Timestamp
+  **completedAt** : Timestamp
+  **rating** : Integer
+  **createdAt** : Timestamp
+  **updatedAt** : Timestamp
+}
+
+user ||--o| user : verifica
+user ||--o{ startup : funda
+user ||--o{ event : organiza
+user }o--o{ event : inscreve-se
+user ||--o{ mentorship : mentora
+user ||--o{ mentorship : solicita
+startup |o--o{ mentorship : vincula
+
+@enduml

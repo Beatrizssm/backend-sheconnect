@@ -1,0 +1,61 @@
+@startuml fluxo-modulos-usuaria
+
+!include ../../_includes/estilo-fluxo.puml
+
+start
+
+:Área logada\nUsuária;
+
+partition "Menu por perfil" {
+  if (Papel?) then (Empreendedora)
+    :Dashboard\nStartups\nMentorias\nEventos\nConexões\nChat\nAvisos;
+  elseif (Mentora) then
+    :Dashboard\nStartups\nMentorias recebidas\nEventos\nConexões\nChat\nAvisos;
+  else (Investidora)
+    :Dashboard\nStartups\nEventos\nConexões\nChat\nAvisos;
+  endif
+}
+
+partition "Startups" {
+  :Lista de startups;
+  if (Ação?) then (Criar)
+    :Formulário nova startup;
+  elseif (Editar) then
+    :Formulário editar startup;
+  else (Visualizar)
+    :Detalhes da startup;
+  endif
+  :Lista de startups;
+}
+
+partition "Mentorias" {
+  :Lista de mentorias;
+  if (Ação?) then (Agendar)
+    :Formulário agendar mentoria;
+  else (Gerenciar)
+    :Detalhes e status;
+  endif
+  :Lista de mentorias;
+}
+
+partition "Eventos" {
+  :Lista de eventos;
+  if (Ação?) then (Ver detalhes)
+    :Detalhe do evento;
+  else (Inscrever-se)
+    :Confirmação de inscrição;
+  endif
+  :Lista de eventos;
+}
+
+partition "Conexões" {
+  :Lista de conexões;
+  :Perfil da conexão;
+  :Lista de conexões;
+}
+
+:Chat / Avisos / Dashboard;
+
+stop
+
+@enduml

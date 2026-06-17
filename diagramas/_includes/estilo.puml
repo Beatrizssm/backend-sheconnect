@@ -1,0 +1,18 @@
+' Estilo compartilhado — diagramas ER SheConnect (A4)
+skinparam linetype ortho
+skinparam shadowing false
+skinparam roundcorner 0
+skinparam dpi 120
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam entity {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  FontSize 11
+}
+skinparam arrow {
+  Color #333333
+  FontSize 10
+}
+hide circle
+hide empty description

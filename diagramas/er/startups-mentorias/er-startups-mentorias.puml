@@ -1,0 +1,64 @@
+@startuml er-startups-mentorias
+
+!include ../../_includes/estilo.puml
+
+entity "User" as user {
+  * **id** : UUID <<PK>>
+  --
+  * **name** : String
+  * **email** : String <<UK>>
+  * **role** : Role
+}
+
+entity "Startup" as startup {
+  * **id** : UUID <<PK>>
+  --
+  * **founderId** : UUID <<FK>>
+  * **name** : String
+  * **description** : String
+  * **category** : String
+  * **stage** : String
+  **investmentGoal** : Decimal
+  **valuation** : Decimal
+  **city** : String
+  **website** : String
+  **pitch** : String
+  **createdAt** : Timestamp
+  **updatedAt** : Timestamp
+}
+
+entity "Mentorship" as mentorship {
+  * **id** : UUID <<PK>>
+  --
+  * **entrepreneurId** : UUID <<FK>>
+  * **mentorId** : UUID <<FK>>
+  **startupId** : UUID <<FK>>
+  * **title** : String
+  * **description** : String
+  * **category** : String
+  * **status** : MentorshipStatus
+  **mentorshipArea** : String
+  **scheduledAt** : Timestamp
+  **completedAt** : Timestamp
+  **feedback** : String
+  **rating** : Integer
+  **createdAt** : Timestamp
+  **updatedAt** : Timestamp
+}
+
+entity "StartupFavorite" as favorite {
+  * **id** : UUID <<PK>>
+  --
+  * **userId** : UUID <<FK>>
+  * **startupId** : UUID <<FK>>
+  **createdAt** : Timestamp
+}
+
+user ||--o{ startup : funda
+user ||--o{ mentorship : "participa\n(empreendedora)"
+user ||--o{ mentorship : "participa\n(mentora)"
+startup |o--o{ mentorship : vincula
+user ||--o{ favorite : favorita
+startup ||--o{ favorite : favoritada
+
+@enduml

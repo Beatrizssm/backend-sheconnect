@@ -21,6 +21,7 @@
   "include": [
     "src/server.ts",
     "src/app.module.ts",
+    "src/microservices/**/*.ts",
     "src/domains/**/*.ts",
     "src/application/**/*.ts",
     "src/infrastructure/**/*.ts",

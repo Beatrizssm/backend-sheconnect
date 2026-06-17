@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { AuditModule } from '../../infrastructure/audit/audit.module';
+import { AuditLoggerModule } from '../../infrastructure/audit/audit-logger.module';
 import { PersistenceModule } from '../persistence.module';
 import { CreateStartupUseCase } from './application/use-cases/create-startup/create-startup.use-case';
 import { DeleteStartupUseCase } from './application/use-cases/delete-startup/delete-startup.use-case';
@@ -14,7 +14,7 @@ import { StartupsController } from './infrastructure/controllers/startups.contro
 import { PrismaStartupRepository } from './infrastructure/prisma/prisma-startup.repository';
 
 @Module({
-  imports: [PersistenceModule, AuditModule],
+  imports: [PersistenceModule, AuditLoggerModule],
   controllers: [StartupsController],
   providers: [
     CreateStartupUseCase,

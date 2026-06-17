@@ -10,6 +10,29 @@ import { MENTORSHIP_STATUS_LABELS, MENTORSHIP_STATUS_STYLES } from '../../../men
 import type { AppTab } from '../../../../shared/types/app.types';
 import { Search, Settings, Calendar, Network, CheckCircle2, ArrowLeft, MapPin } from 'lucide-react';
 
+function EventThumbnail({ category, type }: { category: string; type?: string | null }) {
+  return (
+    <div className="md:w-64 h-48 md:h-auto md:min-h-[220px] shrink-0 bg-gradient-to-br from-[#6063ee]/25 via-[#181445]/10 to-[#F9F8FF] flex flex-col items-center justify-center gap-3 p-6 border-r border-outline-variant/10">
+      <div className="w-14 h-14 rounded-2xl bg-white/80 shadow-sm flex items-center justify-center">
+        <Calendar className="w-7 h-7 text-primary" />
+      </div>
+      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/80 text-center">
+        {type ?? category}
+      </span>
+    </div>
+  );
+}
+
+function EventHeroImage() {
+  return (
+    <>
+      <div className="absolute inset-0 bg-gradient-to-br from-[#181445] via-[#6063ee] to-[#2d2a5b]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_55%)]" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+    </>
+  );
+}
+
 export function EventsPage() {
   const { eventMode, setEventMode, selectedEvent, setSelectedEvent, events, isLoadingEvents, eventsError, handleRegisterEvent } = useAppControllerContext();
 
@@ -46,10 +69,8 @@ export function EventsPage() {
                           {isLoadingEvents && <p className="text-sm font-bold text-on-surface-variant">Carregando eventos...</p>}
                           {!isLoadingEvents && events.map((event) => (
                             <div key={event.id} className="bg-white rounded-[24px] border border-outline-variant/30 shadow-sm overflow-hidden flex flex-col md:flex-row group hover:shadow-md transition-all">
-                              <div className="md:w-64 h-48 md:h-auto overflow-hidden">
-                                <img src="https://images.unsplash.com/photo-1540575861501-7ad05823c23d?w=800&q=80" alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                              </div>
-                              <div className="p-5 sm:p-8 flex-grow flex flex-col justify-center">
+                              <EventThumbnail category={event.category} type={event.type} />
+                              <div className="p-5 sm:p-8 flex-grow flex flex-col justify-center min-w-0">
                                 <h3 className="text-2xl font-bold text-on-surface mb-2">{event.title}</h3>
                                 <div className="flex flex-wrap gap-4 text-sm font-bold text-on-surface-variant/60 mb-4 uppercase tracking-widest">
                                   <span className="text-primary">{new Date(event.eventDate).toLocaleDateString('pt-BR')}</span>
@@ -83,9 +104,8 @@ export function EventsPage() {
                         
                         <div className="bg-white rounded-[40px] shadow-xl overflow-hidden border border-outline-variant/10">
                           <div className="h-64 relative">
-                            <img src="https://images.unsplash.com/photo-1540575861501-7ad05823c23d?w=800&q=80" className="w-full h-full object-cover" alt="" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                            <div className="absolute bottom-8 left-8 text-white">
+                            <EventHeroImage />
+                            <div className="absolute bottom-8 left-8 right-8 text-white">
                               <div className="flex items-center gap-2 mb-2 p-3 bg-white/20 backdrop-blur-md rounded-2xl w-fit">
                                 <Network className="w-6 h-6" />
                               </div>

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { USER_REPOSITORY } from '../../domains/user/repositories/user.repository.port';
-import { AuditModule } from '../../infrastructure/audit/audit.module';
+import { AuditLoggerModule } from '../../infrastructure/audit/audit-logger.module';
 import { PrismaUserRepository } from '../../infrastructure/repositories/prisma-user.repository';
 import { PersistenceModule } from '../persistence.module';
 import { ApproveVerificationUseCase } from './application/use-cases/approve-verification.use-case';
@@ -20,7 +20,7 @@ import { PrismaUserProfileRepository } from './infrastructure/prisma/prisma-user
 import { PrismaUserReportRepository } from './infrastructure/prisma/prisma-user-report.repository';
 
 @Module({
-  imports: [PersistenceModule, AuditModule],
+  imports: [PersistenceModule, AuditLoggerModule],
   controllers: [UsersController, AdminUsersController],
   providers: [
     GetMyProfileUseCase,

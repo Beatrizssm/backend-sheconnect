@@ -1,5 +1,6 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Optional } from '@nestjs/common';
 import { MongoService } from '../../infrastructure/mongo/mongo.service';
+import { RabbitMqPublisherService } from '../../infrastructure/messaging/rabbitmq-publisher.service';
 import { RabbitMqService } from '../../infrastructure/messaging/rabbitmq.service';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 
@@ -7,8 +8,9 @@ import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 export class HealthController {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly mongo: MongoService,
-    private readonly rabbitMq: RabbitMqService,
+    @Optional() private readonly mongo?: MongoService,
+    @Optional() private readonly rabbitMq?: RabbitMqService,
+    @Optional() private readonly rabbitPublisher?: RabbitMqPublisherService,
   ) {}
 
   @Get()
@@ -38,6 +40,10 @@ export class HealthController {
   }
 
   private async checkMongo(): Promise<'UP' | 'DOWN'> {
+    if (!this.mongo) {
+      return 'DOWN';
+    }
+
     try {
       return (await this.mongo.isHealthy()) ? 'UP' : 'DOWN';
     } catch {
@@ -47,7 +53,15 @@ export class HealthController {
 
   private async checkRabbitMq(): Promise<'UP' | 'DOWN'> {
     try {
-      return (await this.rabbitMq.isHealthy()) ? 'UP' : 'DOWN';
+      if (this.rabbitMq) {
+        return (await this.rabbitMq.isHealthy()) ? 'UP' : 'DOWN';
+      }
+
+      if (this.rabbitPublisher) {
+        return (await this.rabbitPublisher.isHealthy()) ? 'UP' : 'DOWN';
+      }
+
+      return 'DOWN';
     } catch {
       return 'DOWN';
     }

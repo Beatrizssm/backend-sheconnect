@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { USER_REPOSITORY } from './domains/user/repositories/user.repository.port';
+import { AuditLoggerModule } from './infrastructure/audit/audit-logger.module';
 import { AuditModule } from './infrastructure/audit/audit.module';
 import { PrismaUserRepository } from './infrastructure/repositories/prisma-user.repository';
 import { HealthController } from './interfaces/controllers/health.controller';
@@ -38,6 +39,7 @@ import { UsersModule } from './modules/users/users.module';
     MentorshipsModule,
     UsersModule,
     PersistenceModule,
+    AuditLoggerModule,
     AuditModule,
   ],
   controllers: [MetricsController, HealthController],

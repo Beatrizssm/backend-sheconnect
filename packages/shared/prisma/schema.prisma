@@ -1,0 +1,305 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ENTREPRENEUR
+  MENTOR
+  INVESTOR
+  ADMIN
+}
+
+enum MentorshipStatus {
+  SOLICITADA
+  EM_ANALISE
+  ACEITA
+  REJEITADA
+  AGENDADA
+  EM_ANDAMENTO
+  CONCLUIDA
+  CANCELADA
+}
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+}
+
+enum ConnectionStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum VerificationStatus {
+  NOT_VERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+model User {
+  id                      String              @id @default(uuid()) @db.Uuid
+  name                    String
+  email                   String              @unique
+  password                String
+  role                    Role
+  bio                     String?
+  linkedin                String?
+  city                    String?
+  profileImage            String?
+  professionalName        String?
+  area                    String?
+  state                   String?
+  instagram               String?
+  website                 String?
+  verificationStatus      VerificationStatus  @default(NOT_VERIFIED)
+  verifiedAt              DateTime?
+  verifiedBy              String?             @db.Uuid
+  verificationReason      String?
+  verificationNotes       String?
+  verificationDocument    String?
+  specialty               String?
+  experienceYears         Int?
+  refreshTokenHash        String?
+  createdAt               DateTime            @default(now())
+  updatedAt               DateTime            @updatedAt
+  startups                Startup[]           @relation("FounderStartups")
+  mentorMentorships       Mentorship[]        @relation("MentorMentorships")
+  entrepreneurMentorships Mentorship[]        @relation("EntrepreneurMentorships")
+  notifications           Notification[]
+  organizedEvents         Event[]
+  eventRegistrations      EventRegistration[]
+  sentConnections         UserConnection[]    @relation("ConnectionRequester")
+  receivedConnections     UserConnection[]    @relation("ConnectionReceiver")
+  sessions                UserSession[]
+  sentChatMessages        ChatMessage[]       @relation("ChatMessagesSent")
+  receivedChatMessages    ChatMessage[]       @relation("ChatMessagesReceived")
+  favoriteStartups        StartupFavorite[]
+  reportsMade             UserReport[]        @relation("ReportsMade")
+  reportsReceived         UserReport[]        @relation("ReportsReceived")
+  verifiedByAdmin         User?               @relation("UserVerifiedBy", fields: [verifiedBy], references: [id], onDelete: SetNull)
+  verificationsPerformed  User[]              @relation("UserVerifiedBy")
+
+  @@index([role])
+  @@index([city])
+  @@index([verificationStatus])
+}
+
+model UserReport {
+  id             String   @id @default(uuid()) @db.Uuid
+  reporterId     String   @db.Uuid
+  reportedUserId String   @db.Uuid
+  reason         String
+  description    String?
+  status         String   @default("OPEN")
+  createdAt      DateTime @default(now())
+  reporter       User     @relation("ReportsMade", fields: [reporterId], references: [id], onDelete: Cascade)
+  reportedUser   User     @relation("ReportsReceived", fields: [reportedUserId], references: [id], onDelete: Cascade)
+
+  @@index([reportedUserId])
+  @@index([reporterId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Startup {
+  id          String   @id @default(uuid()) @db.Uuid
+  founderId   String   @db.Uuid
+  name        String
+  description String
+  category    String
+  stage       String
+  investmentGoal Decimal? @db.Decimal(14, 2)
+  valuation      Decimal? @db.Decimal(14, 2)
+  city           String?
+  website     String?
+  linkedin    String?
+  instagram   String?
+  pitch       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  founder     User     @relation("FounderStartups", fields: [founderId], references: [id], onDelete: Cascade)
+  mentorships Mentorship[]
+  favorites     StartupFavorite[]
+
+  @@index([founderId])
+  @@index([category])
+  @@index([stage])
+  @@index([createdAt])
+}
+
+model Mentorship {
+  id              String           @id @default(uuid()) @db.Uuid
+  entrepreneurId  String           @db.Uuid
+  mentorId        String           @db.Uuid
+  startupId       String?          @db.Uuid
+  title           String
+  description     String
+  category        String
+  mentorshipArea  String?
+  initialMessage  String?
+  status          MentorshipStatus @default(SOLICITADA)
+  scheduledAt     DateTime?
+  completedAt     DateTime?
+  rejectionReason String?
+  feedback        String?
+  rating          Int?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  entrepreneur   User             @relation("EntrepreneurMentorships", fields: [entrepreneurId], references: [id], onDelete: Cascade)
+  mentor         User             @relation("MentorMentorships", fields: [mentorId], references: [id], onDelete: Cascade)
+  startup        Startup?         @relation(fields: [startupId], references: [id], onDelete: SetNull)
+
+  @@index([entrepreneurId])
+  @@index([mentorId])
+  @@index([startupId])
+  @@index([status])
+  @@index([category])
+  @@index([createdAt])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  action     String
+  entity     String
+  entityId   String?
+  userId     String   @db.Uuid
+  beforeData Json?
+  afterData  Json?
+  oldValue   Json?
+  newValue   Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([entity])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model Event {
+  id           String   @id @default(uuid()) @db.Uuid
+  title        String
+  description  String
+  category     String
+  type         String?
+  speaker      String?
+  location     String?
+  isOnline     Boolean  @default(false)
+  meetingLink  String?
+  eventDate    DateTime
+  maxAttendees Int?
+  organizerId  String   @db.Uuid
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  organizer User @relation(fields: [organizerId], references: [id], onDelete: Cascade)
+
+  registrations EventRegistration[]
+
+  @@index([organizerId])
+  @@index([eventDate])
+  @@index([category])
+}
+
+model EventRegistration {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  eventId   String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@index([userId])
+  @@index([eventId])
+}
+
+model Notification {
+  id        String           @id @default(uuid()) @db.Uuid
+  userId    String           @db.Uuid
+  title     String
+  message   String
+  type      NotificationType @default(INFO)
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+model UserConnection {
+  id          String           @id @default(uuid()) @db.Uuid
+  requesterId String           @db.Uuid
+  receiverId  String           @db.Uuid
+  status      ConnectionStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  requester User @relation("ConnectionRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  receiver  User @relation("ConnectionReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, receiverId])
+  @@index([requesterId])
+  @@index([receiverId])
+  @@index([status])
+}
+
+model UserSession {
+  id               String    @id @default(uuid()) @db.Uuid
+  userId           String    @db.Uuid
+  refreshTokenHash String
+  ip               String?
+  userAgent        String?
+  revokedAt        DateTime?
+  createdAt        DateTime  @default(now())
+  expiresAt        DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([revokedAt])
+  @@index([expiresAt])
+}
+
+model StartupFavorite {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  startupId String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  startup Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, startupId])
+  @@index([userId])
+  @@index([startupId])
+}
+
+model ChatMessage {
+  id             String   @id @default(uuid()) @db.Uuid
+  conversationId String
+  senderId       String   @db.Uuid
+  receiverId     String   @db.Uuid
+  message        String
+  read           Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  sender   User @relation("ChatMessagesSent", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("ChatMessagesReceived", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@index([senderId, receiverId, createdAt])
+  @@index([receiverId, read])
+}

@@ -1,5 +1,6 @@
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { CreateAuditLogInput } from '../../application/ports/audit-log.port';
 import { EVENT_BUS, EventBusPort, DomainEventMessage } from '../../application/ports/event-bus.port';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -18,6 +19,11 @@ export class AuditConsumer implements OnModuleInit {
   }
 
   private async persistAuditEvent(event: DomainEventMessage): Promise<void> {
+    if (event.eventType === 'AUDIT_LOG') {
+      await this.persistExplicitAuditLog(event.payload as unknown as CreateAuditLogInput);
+      return;
+    }
+
     if (!event.userId) {
       return;
     }
@@ -35,6 +41,27 @@ export class AuditConsumer implements OnModuleInit {
       });
     } catch (error) {
       this.logger.warn(`Audit consumer skipped event ${event.eventType}: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  private async persistExplicitAuditLog(input: CreateAuditLogInput): Promise<void> {
+    try {
+      await this.prisma.auditLog.create({
+        data: {
+          action: input.action,
+          entity: input.entity,
+          entityId: input.entityId,
+          userId: input.userId,
+          beforeData: this.toJson(input.beforeData),
+          afterData: this.toJson(input.afterData),
+          oldValue: this.toJson(input.oldValue ?? input.beforeData),
+          newValue: this.toJson(input.newValue ?? input.afterData),
+          ipAddress: input.ipAddress,
+          userAgent: input.userAgent,
+        },
+      });
+    } catch (error) {
+      this.logger.warn(`Audit consumer skipped AUDIT_LOG: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 

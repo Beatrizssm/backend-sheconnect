@@ -1,7 +1,7 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
+import { CallHandler, ExecutionContext, Inject, Injectable, NestInterceptor } from '@nestjs/common';
 import { Observable, mergeMap } from 'rxjs';
+import { AUDIT_LOGGER, AuditLoggerPort } from '../../application/ports/audit-log.port';
 import { PrismaService } from '../prisma/prisma.service';
-import { PrismaAuditLoggerService } from './prisma-audit-logger.service';
 
 type RequestLike = {
   method: string;
@@ -22,7 +22,7 @@ const AUDITED_METHODS = new Set(['POST', 'PATCH', 'PUT', 'DELETE']);
 export class AuditInterceptor implements NestInterceptor {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly auditLogger: PrismaAuditLoggerService,
+    @Inject(AUDIT_LOGGER) private readonly auditLogger: AuditLoggerPort,
   ) {}
 
   async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<unknown>> {
